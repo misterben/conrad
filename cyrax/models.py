@@ -10,7 +10,6 @@ from cyrax.events import events
 from cyrax.utils import (safe_url_join, url2path, path2url,
                          base_path, makedirs)
 
-
 logger = logging.getLogger(__name__)
 DATE_RE = re.compile(r'(.*?)(\d+)[/-](\d+)[/-](\d+)[/-](.*)$')
 

@@ -49,6 +49,7 @@ class Site(object):
         if op.exists(conf):
             self.settings.read(file(conf).read().decode('utf-8'))
 
+
         site_base_path = base_path(self.url)
         self.dest = op.join(dest, url2path(site_base_path[1:]))
 
@@ -56,11 +57,16 @@ class Site(object):
         self.env.globals['site'] = self
         self.entries = []
 
+        self.settings.meta = {}
+        self.settings.meta['generator'] = "Conrad 2.6alpha"
+
         if self.settings.get('sitecallback'):
             callback = impcallback(self.settings.sitecallback, self.root)
             callback(self)
 
         self._traverse()
+
+        print self.settings
 
     @property
     def url(self):

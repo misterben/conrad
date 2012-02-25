@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def ishidden(name):
-    return name.startswith('.') or name.startswith('_')
+    return name.startswith('.') and not name.startswith('.ht') or name.startswith('_')
 
 
 def impcallback(relpath, root):
@@ -65,8 +65,6 @@ class Site(object):
             callback(self)
 
         self._traverse()
-
-        print self.settings
 
     @property
     def url(self):

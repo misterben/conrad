@@ -2,7 +2,7 @@
 # Borrowed from Peter Hunt and the CherryPy project (http://www.cherrypy.org).
 # Some taken from Ian Bicking's Paste (http://pythonpaste.org/).
 #
-# Borrowed from Django and adapted for cyrax.
+# Borrowed from Django and adapted for libconrad.
 #
 # Portions copyright (c) 2004, CherryPy Team (team@cherrypy.org)
 # All rights reserved.

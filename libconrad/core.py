@@ -97,6 +97,8 @@ class Site(object):
                                                                       []) and
                         f not in self.settings.get('exclude', [])):
                             self.add_page(op.join(relative, f).replace('\\', '/'))
+                    else:
+                        events.emit(' skipping '+f, site=self)
 
         events.emit('site-traversed', site=self)
 
@@ -110,7 +112,9 @@ class Site(object):
         self._copy_static()
 
     def _copy_static(self):
-        if op.exists(op.join(self.root, 'static')):
-            logger.info('Copying static files')
-            shutil.copytree(op.join(self.root, 'static'),
-                            op.join(self.dest, 'static'))
+        for path, _, files in os.walk(self.root):
+            relative = path[len(self.root):].lstrip(os.sep)
+            if relative.split(op.sep)[len(relative.split(op.sep))-1] == 'static':
+                logger.info('Copying static files for '+os.sep+relative)
+                shutil.copytree(op.join(self.root, relative),
+                                op.join(self.dest, relative))

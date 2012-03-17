@@ -87,7 +87,7 @@ class Site(object):
 
         for path, _, files in os.walk(self.root):
             relative = path[len(self.root):].lstrip(os.sep)
-            if (not relative.startswith('static') and
+            if ('static' not in relative.split(op.sep) and
                 not any(map(ishidden, relative.split(op.sep)))):
                 for f in files:
                     events.emit(' checking '+f, site=self)

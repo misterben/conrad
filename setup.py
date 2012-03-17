@@ -6,21 +6,21 @@ from setuptools import setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-import cyrax
+import libconrad
 
-setup(name = 'cyrax',
+setup(name = 'libconrad',
       description = 'Static site generator',
       long_description = read('README.rst'),
       license = 'BSD',
-      version = cyrax.__version__,
+      version = libconrad.__version__,
       author = 'Alexander Solovyov',
       author_email = 'alexander@solovyov.net',
-      url = 'http://piranha.org.ua/cyrax/',
+      url = 'http://piranha.org.ua/libconrad/',
       install_requires = ['Jinja2', 'smartypants'],
-      packages = ['cyrax', 'cyrax.template'],
+      packages = ['libconrad', 'libconrad.template'],
 
       entry_points = {
-        'console_scripts': ['cyrax = cyrax:main']
+        'console_scripts': ['libconrad = libconrad:main']
         },
 
       classifiers = [

@@ -2,13 +2,14 @@ import re
 import time
 import datetime
 import posixpath
-import os.path as op
 import logging
 
 from libconrad.conf import Settings
 from libconrad.events import events
 from libconrad.utils import (safe_url_join, url2path, path2url,
                          base_path, makedirs)
+
+from libconrad.pubtools import (compress_css, compress_js)
 
 logger = logging.getLogger(__name__)
 DATE_RE = re.compile(r'(.*?)(\d+)[/-](\d+)[/-](\d+)[/-](.*)$')
@@ -43,11 +44,11 @@ class Entry(object):
         self.settings = Settings(parent=self.site.settings)
 
         base = '_%s.html' % self.__class__.__name__.lower()
-        if op.exists(op.join(self.site.root, base)):
+        if os.path.exists(os.path.join(self.site.root, base)):
             self.settings.parent_tmpl = base
 
         self.template = self.get_template()
-        self.settings.base, self.settings.slug = op.split(self.path)
+        self.settings.base, self.settings.slug = os.path.split(self.path)
         self.collect()
         if hasattr(self, 'init'):
             self.init()
@@ -72,10 +73,10 @@ class Entry(object):
         If source is not null and path does not exist, then entry is virtual and
         returns current datetime.
         '''
-        path = op.join(self.site.root, self.path)
-        if self.source and not op.exists(path):
+        path = os.path.join(self.site.root, self.path)
+        if self.source and not os.path.exists(path):
             return datetime.datetime.now()
-        mtime = op.getmtime(path)
+        mtime = os.path.getmtime(path)
         return datetime.datetime(*time.gmtime(mtime)[:6])
 
     def get_template(self):
@@ -97,9 +98,9 @@ class Entry(object):
         return self.settings.get('isdir', True)
 
     def get_dest(self):
-        path = op.join(self.site.dest, url2path(self.get_relative_url()))
+        path = os.path.join(self.site.dest, url2path(self.get_relative_url()))
         if self.isdir():
-            path = op.join(path, 'index.html')
+            path = os.path.join(path, 'index.html')
         return path
 
     def get_relative_url(self):
@@ -117,7 +118,7 @@ class Entry(object):
         # no ideas why but all tag templates contain same self inside
         self.template.globals['entry'] = self
         path = self.get_dest()
-        makedirs(op.dirname(path))
+        makedirs(os.path.dirname(path))
         file(path, 'w').write(self.template.render().encode('utf-8'))
 
 
@@ -140,7 +141,7 @@ class Post(Entry):
         self.date = datetime.datetime(int(Y), int(M), int(D))
         super(Post, self).__init__(site, path, source)
         self.settings.base = base
-        self.settings.slug = op.splitext(slug)[0]
+        self.settings.slug = os.path.splitext(slug)[0]
 
     def init(self):
         # dumb hack
@@ -182,10 +183,10 @@ class Page(Entry):
             if self.path.endswith('index.html'):
                 path = self.path[:-len('index.html')]
             else:
-                path = op.splitext(self.path)[0]
+                path = os.path.splitext(self.path)[0]
         else:
             path = self.path
-        base, slug = op.split(path)
+        base, slug = os.path.split(path)
         self.settings.base = base
         self.settings.slug = slug
 
@@ -209,7 +210,7 @@ events.connect('traverse-started', Page.register)
 
 class Tag(Entry):
 
-    prefix = 'tag' + op.sep
+    prefix = 'tag' + os.path.sep
 
     @classmethod
     def check(cls, site, path):

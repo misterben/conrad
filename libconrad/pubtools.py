@@ -11,8 +11,8 @@ import re
 # "a regex-based JavaScript compression kludge.
 #   http://code.activestate.com/recipes/496882-javascript-code-compression/
 
-class CSSCompressor(source):
-    def remove_comments(css):
+class CSSCompressor(object):
+    def remove_comments(self, css):
         """Remove all CSS comment blocks."""
         
         iemac = False
@@ -26,7 +26,7 @@ class CSSCompressor(source):
             comment_end = css.find("*/", comment_start + 2)
             if comment_end < 0:
                 if not preserve:
-                       css = css[:comment_start]
+                    css = css[:comment_start]
                     break
             elif comment_end >= (comment_start + 2):
                 if css[comment_end - 1] == "\\":
@@ -46,7 +46,7 @@ class CSSCompressor(source):
         return css
 
 
-    def remove_unnecessary_whitespace(css):
+    def remove_unnecessary_whitespace(self, css):
         """Remove unnecessary whitespace characters."""
         
         def pseudoclasscolon(css):
@@ -61,47 +61,46 @@ class CSSCompressor(source):
             regex = re.compile(r"(^|\})(([^\{\:])+\:)+([^\{]*\{)")
             match = regex.search(css)
             while match:
-                   css = ''.join([
-                       css[:match.start()],
+                css = ''.join([
+                    css[:match.start()],
                     match.group().replace(":", "___PSEUDOCLASSCOLON___"),
-                       css[match.end():]])
+                    css[match.end():]])
                 match = regex.search(css)
             return css
         
-           css = pseudoclasscolon(css)
+        css = pseudoclasscolon(css)
         # Remove spaces from before things.
-           css = re.sub(r"\s+([!{};:>+\(\)\],])", r"\1", css)
+        css = re.sub(r"\s+([!{};:>+\(\)\],])", r"\1", css)
         
         # If there is a `@charset`, then only allow one, and move to the beginning.
-           css = re.sub(r"^(.*)(@charset \"[^\"]*\";)", r"\2\1", css)
-           css = re.sub(r"^(\s*@charset [^;]+;\s*)+", r"\1", css)
+        css = re.sub(r"^(.*)(@charset \"[^\"]*\";)", r"\2\1", css)
+        css = re.sub(r"^(\s*@charset [^;]+;\s*)+", r"\1", css)
         
         # Put the space back in for a few cases, such as `@media screen` and
         # `(-webkit-min-device-pixel-ratio:0)`.
-           css = re.sub(r"\band\(", "and (", css)
+        css = re.sub(r"\band\(", "and (", css)
         
         # Put the colons back.
-           css = css.replace('___PSEUDOCLASSCOLON___', ':')
+        css = css.replace('___PSEUDOCLASSCOLON___', ':')
         
         # Remove spaces from after things.
-           css = re.sub(r"([!{}:;>+\(\[,])\s+", r"\1", css)
+        css = re.sub(r"([!{}:;>+\(\[,])\s+", r"\1", css)
         
         return css
 
-
-    def remove_unnecessary_semicolons(css):
+    def remove_unnecessary_semicolons(self, css):
         """Remove unnecessary semicolons."""
         
         return re.sub(r";+\}", "}", css)
 
 
-    def remove_empty_rules(css):
+    def remove_empty_rules(self, css):
         """Remove empty rules."""
         
         return re.sub(r"[^\}\{]+\{\}", "", css)
 
 
-    def normalize_rgb_colors_to_hex(css):
+    def normalize_rgb_colors_to_hex(self, css):
         """Convert `rgb(51,102,153)` to `#336699`."""
         
         regex = re.compile(r"rgb\s*\(\s*([0-9,\s]+)\s*\)")
@@ -109,37 +108,37 @@ class CSSCompressor(source):
         while match:
             colors = map(lambda s: s.strip(), match.group(1).split(","))
             hexcolor = '#%.2x%.2x%.2x' % tuple(map(int, colors))
-               css = css.replace(match.group(), hexcolor)
+            css = css.replace(match.group(), hexcolor)
             match = regex.search(css)
         return css
 
 
-    def condense_zero_units(css):
+    def condense_zero_units(self, css):
         """Replace `0(px, em, %, etc)` with `0`."""
         
         return re.sub(r"([\s:])(0)(px|em|%|in|cm|mm|pc|pt|ex)", r"\1\2", css)
 
 
-    def condense_multidimensional_zeros(css):
+    def condense_multidimensional_zeros(self, css):
         """Replace `:0 0 0 0;`, `:0 0 0;` etc. with `:0;`."""
         
-           css = css.replace(":0 0 0 0;", ":0;")
-           css = css.replace(":0 0 0;", ":0;")
-           css = css.replace(":0 0;", ":0;")
+        css = css.replace(":0 0 0 0;", ":0;")
+        css = css.replace(":0 0 0;", ":0;")
+        css = css.replace(":0 0;", ":0;")
         
         # Revert `background-position:0;` to the valid `background-position:0 0;`.
-           css = css.replace("background-position:0;", "background-position:0 0;")
+        css = css.replace("background-position:0;", "background-position:0 0;")
         
         return css
 
 
-    def condense_floating_points(css):
+    def condense_floating_points(self, css):
         """Replace `0.6` with `.6` where possible."""
         
         return re.sub(r"(:|\s)0+\.(\d+)", r"\1.\2", css)
 
 
-    def condense_hex_colors(css):
+    def condense_hex_colors(self, css):
         """Shorten colors from #AABBCC to #ABC where possible."""
         
         regex = re.compile(r"([^\"'=\s])(\s*)#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])")
@@ -148,26 +147,26 @@ class CSSCompressor(source):
             first = match.group(3) + match.group(5) + match.group(7)
             second = match.group(4) + match.group(6) + match.group(8)
             if first.lower() == second.lower():
-                   css = css.replace(match.group(), match.group(1) + match.group(2) + '#' + first)
+                css = css.replace(match.group(), match.group(1) + match.group(2) + '#' + first)
                 match = regex.search(css, match.end() - 3)
             else:
                 match = regex.search(css, match.end())
         return css
 
 
-    def condense_whitespace(css):
+    def condense_whitespace(self, css):
         """Condense multiple adjacent whitespace characters into one."""
         
         return re.sub(r"\s+", " ", css)
 
 
-    def condense_semicolons(css):
+    def condense_semicolons(self,css):
         """Condense multiple adjacent semicolon characters into one."""
         
         return re.sub(r";;+", ";", css)
 
 
-    def wrap_css_lines(css, line_length):
+    def wrap_css_lines(self,css, line_length):
         """Wrap the lines of the given CSS to an approximate length."""
         
         lines = []
@@ -182,8 +181,7 @@ class CSSCompressor(source):
             lines.append(css[line_start:])
         return '\n'.join(lines)
 
-
-    def compress:
+    def compress(self):
         css = remove_comments(css)
         css = condense_whitespace(css)
         # A pseudo class for the Box Model Hack

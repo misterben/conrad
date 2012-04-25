@@ -3,6 +3,8 @@
 #from StringIO import StringIO # The pure-Python StringIO supports unicode.
 import re
 
+__version__ = 0.2
+ 
 # Sources and Inspiration:
 # 
 # YUI in Python (a.k.a. CSSMIN)
@@ -181,38 +183,24 @@ class CSSCompressor(object):
             lines.append(css[line_start:])
         return '\n'.join(lines)
 
-    def compress(self):
-        css = remove_comments(css)
-        css = condense_whitespace(css)
+    def compress(self, css):
+        css = self.remove_comments(css)
+        css = self.condense_whitespace(css)
         # A pseudo class for the Box Model Hack
         # (see http://tantek.com/CSS/Examples/boxmodelhack.html)
         css = css.replace('"\\"}\\""', "___PSEUDOCLASSBMH___")
-        css = remove_unnecessary_whitespace(css)
-        css = remove_unnecessary_semicolons(css)
-        css = condense_zero_units(css)
-        css = condense_multidimensional_zeros(css)
-        css = condense_floating_points(css)
-        css = normalize_rgb_colors_to_hex(css)
-        css = condense_hex_colors(css)
+        css = self.remove_unnecessary_whitespace(css)
+        css = self.remove_unnecessary_semicolons(css)
+        css = self.condense_zero_units(css)
+        css = self.condense_multidimensional_zeros(css)
+        css = self.condense_floating_points(css)
+        css = self.normalize_rgb_colors_to_hex(css)
+        css = self.condense_hex_colors(css)
         css = css.replace("___PSEUDOCLASSBMH___", '"\\"}\\""')
-        css = condense_semicolons(css)
+        css = self.condense_semicolons(css)
         return css.strip()
 
-class JSCompressor(object):
-
-    def __init__(self, compressionLevel=2, measureCompression=False):
-        '''
-        compressionLevel:
-        0 - no compression, script returned unchanged. For debugging only -
-            try if you suspect that compression compromises your script
-        1 - Strip comments and empty lines, don't change line breaks and indentation (code remains readable)
-        2 - Additionally strip insignificant whitespace (code will become quite unreadable)
-
-        measureCompression: append a comment stating the extent of compression
-        '''
-        self.compressionLevel = compressionLevel
-        self.measureCompression = measureCompression
-
+class JSCompressor():
     # a bunch of regexes used in compression
     # first, exempt string and regex literals from compression by transient substitution
 
@@ -245,11 +233,6 @@ class JSCompressor(object):
         '''
         perform compression and return compressed script
         '''
-        if self.compressionLevel == 0:
-            return script
-
-        lengthBefore = len(script)
-
         # first, substitute string literals by placeholders to prevent the regexes messing with them
         literals = []
 
@@ -266,12 +249,10 @@ class JSCompressor(object):
         script = self.mlc.sub('\n', script)     # replace real multiline comments by newlines
 
         # remove empty lines and trailing whitespace
-        script = '\n'.join([l.rstrip() for l in script.splitlines() if l.strip()])
+        #script = '\n'.join([l.rstrip() for l in script.splitlines() if l.strip()])
+        script = ''.join([l.rstrip() for l in script.splitlines() if l.strip()])
 
-        if self.compressionLevel == 2:              # squeeze out any dispensible whitespace
-            script = self.squeeze.sub('', script)
-        elif self.compressionLevel == 1:            # only collapse multiple whitespace characters
-            script = self.collapseWs.sub(' ', script)
+        script = self.squeeze.sub('', script)
 
         # now back-substitute the string and regex literals
         def backsub(mo):
@@ -279,10 +260,30 @@ class JSCompressor(object):
 
         script = self.backSubst.sub(backsub, script)
 
-        if self.measureCompression:
-            lengthAfter = float(len(script))
-            squeezedBy = int(100*(1-lengthAfter/lengthBefore))
-            script += '\n// squeezed out %s%%\n' % squeezedBy
-
         return script
 
+
+### BEGIN TEST CODE -- REFACTOR for YUI compatible interface, later! ###
+
+def main():
+    import optparse
+    import sys
+    
+    p = optparse.OptionParser(
+        prog="cssmin", version=__version__,
+        usage="%prog",
+        description="""Reads CSS or HTML from stdin, and writes compressed varient to stdout.""")
+    
+#    p.add_option(
+#        '-w', '--wrap', type='int', default=None, metavar='N',
+#        help="Wrap output to approximately N chars per line.")
+    
+    options, args = p.parse_args()
+
+    myCompressor = JSCompressor()
+
+    sys.stdout.write(myCompressor.compress(sys.stdin.read()))
+
+if __name__ == '__main__':
+    main()
+ 

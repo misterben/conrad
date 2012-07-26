@@ -20,6 +20,9 @@ def main():
     parser.add_option('-v', '--verbose', default=False, action='store_true',
                       help='output more logs')
 
+    parser.add_option('-c', '--create', default=False, action='store_true', help='Create a basic website in the current directory based on the given template')
+    parser.add_option('-t', '--template', default='default', type='string', action='store', dest='template', help='Create a basic website in the current directory based on the given template')
+
     parser.add_option('-w', '--webserve', default=False, action='store_true',
                       help='start local web server')
     parser.add_option('-a', '--address', default='127.0.0.1',
@@ -50,12 +53,32 @@ def main():
     else:
         logging.basicConfig(filename=opts.log, level=level)
 
+    if opts.create:
+        if op.exists(op.join(op.dirname(op.abspath(__file__)), 'templates', opts.template)):
+            print "Creating basic site with template "+opts.template
+            title = raw_input('Enter a title for your site: ')
+            author = raw_input('Enter your name: ')
+            url = raw_input('Enter your site URL: ')
+            settings = open('settings.cfg', 'w')
+            settings.write('title:'+title+'\n')
+            settings.write('author:'+author+'\n')
+            settings.write('url:'+url+'\n')
+            settings.close()
+            from os import system
+            system('cp -R '+op.join(op.dirname(op.abspath(__file__)),'templates',opts.template, '*')+' .')
+        else:
+            print "Template "+opts.template+" does not exist"
+            print "(Looking in "+op.join(op.dirname(op.abspath(__file__)), 'templates', opts.template)+")"
+
+        sys.exit(1)
+
     source = op.abspath(args and args[0] or '.')
     if not op.exists(op.join(source, 'settings.cfg')):
         logger.error("Can't find settings.cfg in the current folder")
         sys.exit(1)
 
     dest = opts.dest or op.join(source, '_build')
+
 
     if opts.webserve:
         start_server(opts.address, opts.port, source, dest)

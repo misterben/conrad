@@ -6,11 +6,8 @@
 
 Conrad is a static site generator using Jinja2_ template engine.
 
-It's inspired from Jekyll_ and Hyde_ site generators and started when I realized
-that I'm dissatisfied with both of them by different reasons. When I tried to
-come up with name I remembered my favourite character from Mortal Kombat 3 so
-here we go.
-
+It's forked from Cyrax_
+ 
 Installation
 ------------
 
@@ -37,7 +34,7 @@ News
 Indeed something happens with each release and you are probably interested what
 (and too lazy to read `changelog`_).
 
-.. _changelog: http://github.com/piranha/conrad/
+.. _changelog: http://github.com/Xalior/conrad/
 
 2.4-2.5 (16.08.2011)
 ~~~~~~~~~~~~~~~~~~~~
@@ -66,7 +63,7 @@ Indeed something happens with each release and you are probably interested what
 - ability to write posts in reStructuredText (which as well could serve as an
   `example`_ to writing your own models).
 
-.. _example: http://github.com/piranha/conrad/blob/master/conrad/rstpost.py
+.. _example: http://github.com/piranha/cyrax/blob/master/conrad/rstpost.py
 
 1.0-1.1 (28.11.2010)
 ~~~~~~~~~~~~~~~~~~~~
@@ -79,6 +76,6 @@ Indeed something happens with each release and you are probably interested what
 .. _Jinja2: http://jinja.pocoo.org/2/
 .. _Jekyll: http://github.com/mojombo/jekyll/
 .. _Hyde: http://github.com/lakshmivyas/hyde/
-.. _repository: http://github.com/piranha/conrad/
-.. _docs: http://conrad.readthedocs.org/
-.. _example site: http://github.com/piranha/conrad/tree/master/content/
+.. _repository: http://github.com/Xalior/conrad/
+.. _docs: http://cyrax.readthedocs.org/
+.. _example site: http://github.com/piranha/cyrax/tree/master/content/
